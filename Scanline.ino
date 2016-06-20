@@ -33,8 +33,8 @@ Renderer renderer ( tft, WIDTH, HEIGHT );
 
 // 3Dobjets and container for them
 #define MAXOBJECTS 3
-Object3d<float>  obj  (verts1, numberV1, faces1, numberF1 );
-Object3d<float>  obj1 (verts2, numberV2, faces2, numberF2 );
+Object3d<float>  obj1  (verts1, numberV1, faces1, numberF1 );
+Object3d<float>  obj (verts2, numberV2, faces2, numberF2 );
 Object3d<float>  * objs[MAXOBJECTS];
 Object3d<float>  * actual;
 
@@ -43,6 +43,7 @@ void setup() {
   objs[0] = &obj;
   objs[1] = &obj1;
   actual = &obj;
+
   
   Serial.begin( 57600 );
   tft.begin();
@@ -160,9 +161,9 @@ void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color
        cw %= 64;
        
        if ( facecounter < MAXFACE) {
-          d2s[facecounter].p0 = RenderPoint ( x ,y,  verts[i1].z*50);
-          d2s[facecounter].p1 = RenderPoint ( x1,y1, verts[i2].z*50 );
-          d2s[facecounter].p2 = RenderPoint ( x2,y2, verts[i3].z *50);
+          d2s[facecounter].p0 = RenderPoint ( x ,y,  verts[i1].z*50 , 0, 0);
+          d2s[facecounter].p1 = RenderPoint ( x1,y1, verts[i2].z*50 , 31, 31);
+          d2s[facecounter].p2 = RenderPoint ( x2,y2, verts[i3].z *50, 31, 0);
           d2s[facecounter].calculate();
           d2s[facecounter].color = colors[cw] | color; 
           facecounter++;
@@ -200,47 +201,64 @@ void loop() {
 
    angle += 2;
    angle %= 720;
- /*  
-   VertexInt o1 = { 0, 0, 200};
-
-   
-   o2 = { 0,  50,  50};
-   matrix2.createRotM ( -szog*3, -szog*2,0 );
-   o2 = o2 *matrix2;
-   o2.z +=200;
-
-   o3 = { 0,  100, 100 };
-   matrix2.createRotM ( 0, -szog, szog / 5);
-   o3 = o3 * matrix2;
-   o3.z +=300;*/
+ 
 
    // rotate objects and create faces
    uint8_t d2counter = 0;             // number of face to draw ( after back face culling )
 
    int i =0;
+   /*
    matrix.createRotM ( objs[i]->angle.x, angle,  objs[i]->angle.z );
    objs[i]->rotate ( matrix, rotatedVerts, Vertex<float> ( 25,25,25 ) );              // rotate obj vers and put the result in rotetdVerts array 
    translate ( rotatedVerts, objs[i]->position , objs[i]->vertN );
-   create2DFaces  ( *objs[i], rotatedVerts,  0xf000, d2counter );                     // create faces and give the created number of faces back in d2counter
+   create2DFaces  ( *objs[i], rotatedVerts,  0xf000, d2counter );    */                 // create faces and give the created number of faces back in d2counter
 
-   i =1; 
+  /* i =1; 
    matrix.createRotM ( objs[i]->angle.x,  objs[i]->angle.y ,  0);
    objs[i]->rotate ( matrix, rotatedVerts, Vertex <float> ( 1,1,1 ) );                // rotate obj vers and put the result in rotetdVerts array 
    translate ( rotatedVerts, objs[i]->position , objs[i]->vertN );
-   create2DFaces  ( *objs[i], rotatedVerts, 0x0f00, d2counter );                      // create faces and give the created number of faces back in d2counter
+   create2DFaces  ( *objs[i], rotatedVerts, 0x0f00, d2counter );      */                 // create faces and give the created number of faces back in d2counter
+   int16_t x,x1,x2,y0,y, y1,y2, x3,y3;
+
+   x = 160 + cos( 3.14 / 180 * angle ) *50;
+   y = 100 + sin( 3.14 / 180 * angle ) *50;
    
-   drawGraph ( d2counter, 0);
+   x1 = 160 + cos( 3.14 / 180 * ( angle + 90 )) *50;  
+   y1  = 100 + sin( 3.14 / 180 * ( angle + 90) ) *50;
+   
+   x2 = 160 + cos( 3.14 / 180 *  ( angle + 180 ) ) *50;  
+   y2 = 100 + sin( 3.14 / 180 * ( angle + 180) ) *50;
+
+   x3 = 160 + cos( 3.14 / 180 *  ( angle + 270 ) ) *50;  
+   y3 = 100 + sin( 3.14 / 180 * ( angle + 270) ) *50;
+
+  
+   d2s[0].p0 = RenderPoint ( x , y, 200 , 0, 0);
+   d2s[0].p1 = RenderPoint ( x1, y1, 200 , 31, 0);
+   d2s[0].p2 = RenderPoint ( x2, y2, 200, 31, 31);
+   d2s[0].calculate();
+  
+   d2s[1].p0 = RenderPoint ( x2 , y2, 200 , 31, 31);
+   d2s[1].p1 = RenderPoint ( x3, y3, 200 , 0, 31);
+   d2s[1].p2 = RenderPoint ( x, y, 200 , 0, 0);
+   d2s[1].calculate();
+   d2counter = 2;
+   
+ //  drawGraph ( d2counter, 0);
    
    // draw faces ----------------------------------------------
    tft.setAddrWindow ( 20, 20,  19 + WIDTH , 20 + HEIGHT );
+  // renderer.renderWithTexture ( d2s, d2counter ); 
+  /// Serial.println ( "-------" );
    if ( wire ) {
       renderer.renderWires ( d2s, d2counter );                                      // d2 scanline could be optimized a lot i have to check  the original draTriangle agorithm
    }
    else {
-    if ( deepTest )    
+     renderer.renderWithTexture ( d2s, d2counter ); 
+    /*if ( deepTest )    
       renderer.renderWithDeep    (d2s, d2counter);
     else 
-      renderer.renderWithoutDeep (d2s, d2counter);
+      renderer.renderWithoutDeep (d2s, d2counter);*/
    }
    
  }

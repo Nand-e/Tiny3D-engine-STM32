@@ -13,7 +13,7 @@ Object3d<T>::Object3d ( const Vertex<T> * verts1, uint8_t vertN1, const Face * f
     faceN   = faceN1;
     position.x = 0;
     position.y = 0;
-    position.z = 200;
+    position.z = 300;
     angle.x = -180;
     angle.y = angle.z = 0;
 }
