@@ -10,3 +10,12 @@ Now, it uses float point numbers, in the feauture I plan to use fix point number
 
 
 ![Alt text](/images/img.jpg?raw=true "Tiny 3D engine")
+
+Now, the engine can make textures. 
+
+Please take it easy, It is only a demo, there are some mistake in it, and I try to 
+rewrite the code to use fixpoint algorithm, but it hasn't been finished yet. 
+So there are mixed number in the code ( float and fix point too ).
+
+
+![Alt text](/images/Texturing.png?raw=true "Tiny 3D engine")
