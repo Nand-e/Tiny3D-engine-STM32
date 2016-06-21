@@ -33,15 +33,13 @@ Renderer renderer ( tft, WIDTH, HEIGHT );
 
 // 3Dobjets and container for them
 #define MAXOBJECTS 3
-Object3d<float>  obj1  (verts1, numberV1, faces1, numberF1 );
-Object3d<float>  obj (verts2, numberV2, faces2, numberF2 );
-Object3d<float>  * objs[MAXOBJECTS];
-Object3d<float>  * actual;
+Object3d<float>  obj(verts2, numberV2, faces2, numberF2 );
+Object3d<float>   * actual;
+
+
 
 /*******************************************************************/
 void setup() {
-  objs[0] = &obj;
-  objs[1] = &obj1;
   actual = &obj;
 
   
@@ -85,8 +83,8 @@ void handleSerial () {
             else deepTest = true;
             break;
       
-      case '1':  actual = objs[0]; break;
-      case '2':  actual = objs[1]; break;
+   /*   case '1':  actual = objs[0]; break;*/
+   /*  case '2':  actual = objs[1]; break;*/
 
       case 'i':  actual->angle.x+=3; break;
       case 'm':  actual->angle.x-=3; break;
@@ -152,20 +150,20 @@ void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color
     
     // back face culling 
     int16_t n = (x1-x)*(y1 + y) + (x2-x1) *(y2+y1) + (x - x2)*(y + y2);
-    if ( n < 0 ) { 
+    if ( n > 0 ) { 
        normal = obj.calcNormal(verts[i1], verts[i2], verts[i3] );           // MISTAKE I calculate the normals from projected verts. I have to repair this TODO
        // calculate light
        fl = normal.dot( light2 );
        if ( fl < 0  ) fl =0;    
        uint8_t cw  =  10+ 53 * fl;
-       cw %= 64;
-       
+       cw %= 64;  
        if ( facecounter < MAXFACE) {
-          d2s[facecounter].p0 = RenderPoint ( x ,y,  verts[i1].z*50 , 0, 0);
-          d2s[facecounter].p1 = RenderPoint ( x1,y1, verts[i2].z*50 , 31, 31);
-          d2s[facecounter].p2 = RenderPoint ( x2,y2, verts[i3].z *50, 31, 0);
+          d2s[facecounter].p0 = RenderPoint ( x ,y,  verts[i1].z*50 , UV[i1][0], UV[i1][1]);
+          d2s[facecounter].p1 = RenderPoint ( x1,y1, verts[i2].z*50 , UV[i2][0], UV[i2][1]);
+          d2s[facecounter].p2 = RenderPoint ( x2,y2, verts[i3].z *50, UV[i3][0], UV[i3][1]);
           d2s[facecounter].calculate();
           d2s[facecounter].color = colors[cw] | color; 
+          d2s[facecounter].textId = ( i/2 ) % 6;      // TODO move to faces
           facecounter++;
        }     
     }
@@ -193,6 +191,8 @@ Matrix matrix2;
 long lastDraw; 
 int16_t angle = 0;
 
+
+
 void loop() {   
    lastDraw = millis();   
    handleSerial();
@@ -207,44 +207,23 @@ void loop() {
    uint8_t d2counter = 0;             // number of face to draw ( after back face culling )
 
    int i =0;
-   /*
-   matrix.createRotM ( objs[i]->angle.x, angle,  objs[i]->angle.z );
-   objs[i]->rotate ( matrix, rotatedVerts, Vertex<float> ( 25,25,25 ) );              // rotate obj vers and put the result in rotetdVerts array 
-   translate ( rotatedVerts, objs[i]->position , objs[i]->vertN );
-   create2DFaces  ( *objs[i], rotatedVerts,  0xf000, d2counter );    */                 // create faces and give the created number of faces back in d2counter
-
-  /* i =1; 
-   matrix.createRotM ( objs[i]->angle.x,  objs[i]->angle.y ,  0);
-   objs[i]->rotate ( matrix, rotatedVerts, Vertex <float> ( 1,1,1 ) );                // rotate obj vers and put the result in rotetdVerts array 
-   translate ( rotatedVerts, objs[i]->position , objs[i]->vertN );
-   create2DFaces  ( *objs[i], rotatedVerts, 0x0f00, d2counter );      */                 // create faces and give the created number of faces back in d2counter
-   int16_t x,x1,x2,y0,y, y1,y2, x3,y3;
-
-   x = 160 + cos( 3.14 / 180 * angle ) *50;
-   y = 100 + sin( 3.14 / 180 * angle ) *50;
-   
-   x1 = 160 + cos( 3.14 / 180 * ( angle + 90 )) *50;  
-   y1  = 100 + sin( 3.14 / 180 * ( angle + 90) ) *50;
-   
-   x2 = 160 + cos( 3.14 / 180 *  ( angle + 180 ) ) *50;  
-   y2 = 100 + sin( 3.14 / 180 * ( angle + 180) ) *50;
-
-   x3 = 160 + cos( 3.14 / 180 *  ( angle + 270 ) ) *50;  
-   y3 = 100 + sin( 3.14 / 180 * ( angle + 270) ) *50;
-
+ 
+   matrix.createRotM ( -angle ,angle*2 , angle *2 );
+   obj.rotate ( matrix, rotatedVerts, Vertex<float> ( 2,2,2 ) );              // rotate obj vers and put the result in rotetdVerts array 
   
-   d2s[0].p0 = RenderPoint ( x , y, 200 , 0, 0);
-   d2s[0].p1 = RenderPoint ( x1, y1, 200 , 31, 0);
-   d2s[0].p2 = RenderPoint ( x2, y2, 200, 31, 31);
-   d2s[0].calculate();
-  
-   d2s[1].p0 = RenderPoint ( x2 , y2, 200 , 31, 31);
-   d2s[1].p1 = RenderPoint ( x3, y3, 200 , 0, 31);
-   d2s[1].p2 = RenderPoint ( x, y, 200 , 0, 0);
-   d2s[1].calculate();
-   d2counter = 2;
+   VertexInt pos;
+   pos.x = 0;
+   pos.y = 0;
+   pos.z = 250;
    
- //  drawGraph ( d2counter, 0);
+   translate ( rotatedVerts, pos , obj.vertN );
+   create2DFaces  ( obj, rotatedVerts,  0xf000, d2counter );                     // create faces and give the created number of faces back in d2counter
+
+   
+   matrix.createRotM( 0 , 0, angle );
+   
+
+   drawGraph ( d2counter, 0);
    
    // draw faces ----------------------------------------------
    tft.setAddrWindow ( 20, 20,  19 + WIDTH , 20 + HEIGHT );
@@ -254,7 +233,7 @@ void loop() {
       renderer.renderWires ( d2s, d2counter );                                      // d2 scanline could be optimized a lot i have to check  the original draTriangle agorithm
    }
    else {
-     renderer.renderWithTexture ( d2s, d2counter ); 
+     renderer.renderWithTexture ( d2s, d2counter, 0);  
     /*if ( deepTest )    
       renderer.renderWithDeep    (d2s, d2counter);
     else 

@@ -11,6 +11,7 @@ public:
     RenderPoint ( uint16_t x=0, uint16_t y=0, uint16_t deep = 1, uint8_t u = 0, uint8_t v =0 );
     uint16_t x,y,deep;
 	  uint8_t  u, v;
+    
 };
 
 class D2Triangle
@@ -22,6 +23,7 @@ public:
     // retutn the left edge point and right edge point in given line
     // return false if it has not any part of the given line
     bool scanLine ( uint16_t line, RenderPoint & pl, RenderPoint & pr );
+    bool scanLine2 ( uint16_t line, RenderPoint & pl, RenderPoint & pr ); // for texture without deep
     void calculate();
 
     RenderPoint p0, p1, p2;
@@ -30,6 +32,7 @@ public:
     int16_t  dy02, dy01, dy12;
     int16_t  dd01, dd02, dd12;
     uint16_t color;
+    uint8_t textId;
 };
 
 #endif

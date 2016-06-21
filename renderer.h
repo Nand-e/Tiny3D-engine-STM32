@@ -6,6 +6,9 @@
 
 #define TFTWIDTH 320
 
+
+
+
 class Renderer
 {
 public:
@@ -15,11 +18,13 @@ public:
     void renderWires ( D2Triangle * d2s, uint8_t length );
     void renderWithoutDeep (D2Triangle * d2s, uint8_t length );
     void renderWithDeep ( D2Triangle * d2s, uint8_t length );
-	void renderWithTexture(D2Triangle * d2s, uint8_t length);
+	  void renderWithTexture(D2Triangle * d2s, uint8_t length, const uint16_t * p);
     
     uint16_t colorLine[TFTWIDTH];
     uint16_t deepLine [TFTWIDTH];
     uint16_t wid, hei;
+
+    const uint16_t * images[6];      // pointer to images
 
 };
 
