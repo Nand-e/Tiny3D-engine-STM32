@@ -11,6 +11,7 @@ public:
     RenderPoint ( uint16_t x=0, uint16_t y=0, uint16_t deep = 1, uint8_t u = 0, uint8_t v =0 );
     uint16_t x,y,deep;
 	  uint8_t  u, v;
+ 
     
 };
 
@@ -33,6 +34,7 @@ public:
     int16_t  dd01, dd02, dd12;
     uint16_t color;
     uint8_t textId;
+    uint8_t  width;
 };
 
 #endif

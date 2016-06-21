@@ -19,21 +19,22 @@
 D2Triangle d2s [MAXFACE];
 
 Vertex<float> rotatedVerts [140];
-Vertex<float>    light2( 0, 0, 1);
+Vertex<float>  light2( 0, 0, 1);
 
 uint16_t  colors [64];
 bool      wire = false, deepTest = true;
 
 Adafruit_ILI9341_STM tft = Adafruit_ILI9341_STM(cs, dc, rst);       // Invoke custom library
 
-#define WIDTH 280
-#define HEIGHT 200
+#define WIDTH 320
+#define HEIGHT 220
 Renderer renderer ( tft, WIDTH, HEIGHT );
 
 
 // 3Dobjets and container for them
 #define MAXOBJECTS 3
 Object3d<float>  obj(verts2, numberV2, faces2, numberF2 );
+//Object3d<float>  obj1(verts1, numberV1, faces1, numberF1 );
 Object3d<float>   * actual;
 
 
@@ -132,8 +133,8 @@ void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color
   float fc, fl;  
   // project all vberticies to 2D plane
   for ( int i = 0; i < obj.vertN; i++ )  {
-     verts[i].x =  CENTERX + verts[i].x / ( verts[i].z /100);  
-     verts[i].y =  CENTERY + verts[i].y / ( verts[i].z /100);   
+     verts[i].x =  CENTERX + verts[i].x / ( verts[i].z / 200);  
+     verts[i].y =  CENTERY + verts[i].y / ( verts[i].z / 200);   
   }
   // create faces
   int i1, i2, i3;
@@ -163,7 +164,10 @@ void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color
           d2s[facecounter].p2 = RenderPoint ( x2,y2, verts[i3].z *50, UV[i3][0], UV[i3][1]);
           d2s[facecounter].calculate();
           d2s[facecounter].color = colors[cw] | color; 
-          d2s[facecounter].textId = ( i/2 ) % 6;      // TODO move to faces
+          d2s[facecounter].textId = (i/2)%5;      // TODO move to faces
+          d2s[facecounter].width  = 80;
+          // else                      d2s[facecounter].width  = 20;
+     
           facecounter++;
        }     
     }
@@ -174,13 +178,13 @@ void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color
  * 
  *****************************************************************************/
  void drawGraph ( uint8_t rt, uint8_t ct ) {
-  rt %= 1000;
-  ct %= 1000;
+  //rt %= 1000;
+  //ct %= 1000;
 
  // tft.fillRect ( 5, 120, 6, 100-rt/5  , 5 );
  // tft.fillRect ( 5, 219 -rt, 6, rt , 31 << 5);
   tft.setCursor(0, 221); 
-  tft.fillRect ( 0,220, 50, 18,31 << 5);
+  tft.fillRect ( 0,220, 25, 18,31 << 5);
   tft.print ( rt);   
 }
 /************************************************************************/
@@ -208,25 +212,28 @@ void loop() {
 
    int i =0;
  
-   matrix.createRotM ( -angle ,angle*2 , angle *2 );
+   matrix.createRotM ( angle ,angle*2 , angle *2 );
    obj.rotate ( matrix, rotatedVerts, Vertex<float> ( 2,2,2 ) );              // rotate obj vers and put the result in rotetdVerts array 
-  
+
    VertexInt pos;
-   pos.x = 0;
-   pos.y = 0;
-   pos.z = 250;
-   
+   pos.x = -150;
+   pos.y = 100;
+   pos.z = 650;   
    translate ( rotatedVerts, pos , obj.vertN );
    create2DFaces  ( obj, rotatedVerts,  0xf000, d2counter );                     // create faces and give the created number of faces back in d2counter
 
-   
-   matrix.createRotM( 0 , 0, angle );
-   
-
+   matrix.createRotM ( -30 , -angle , angle *3 );
+   obj.rotate ( matrix, rotatedVerts, Vertex<float> ( 2,2,2 ) );   
+   pos.x = 150;
+   pos.y = -100;
+   pos.z = 600;   
+   translate ( rotatedVerts, pos , obj.vertN );
+   create2DFaces  ( obj, rotatedVerts,  0xf000, d2counter );  
+  
    drawGraph ( d2counter, 0);
    
    // draw faces ----------------------------------------------
-   tft.setAddrWindow ( 20, 20,  19 + WIDTH , 20 + HEIGHT );
+   tft.setAddrWindow ( 0, 0,   WIDTH- 1,  HEIGHT );
   // renderer.renderWithTexture ( d2s, d2counter ); 
   /// Serial.println ( "-------" );
    if ( wire ) {

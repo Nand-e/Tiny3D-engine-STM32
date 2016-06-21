@@ -71,22 +71,22 @@ void Renderer::renderWithTexture(D2Triangle * d2s, uint8_t length, const uint16_
 			needclear = false;
 		}
 		for (uint8_t d = 0; d < length; d++)
-			if (y >= d2s[d].p0.y && y <= d2s[d].p2.y) {                   // moved here from D2.scanline to save calling cost for performance reason // public vars etc... ARghhhh
+			if (y >= d2s[d].p0.y && y <= d2s[d].p2.y) {                       // moved here from D2.scanline to save calling cost for performance reason // public vars etc... ARghhhh
 				imagep = images[ d2s[d].textId ];
 				d2s[d].scanLine2(y, lp, rp);
-				if (lp.x <= 0) continue; // || rp.x >= wid ) continue;
-				if (rp.x >= wid)  rp.x = wid;
-				// int16_t dd = (rp.deep - lp.deep) / (rp.x - lp.x + 1);      // calcualte deep steps
+				if (lp.x <= 0) continue; // || rp.x >= wid ) continue;	        // TODO 
+				// int16_t dd = (rp.deep - lp.deep) / (rp.x - lp.x + 1);        // calcualte deep steps
 				int16_t textUstep = ((rp.u - lp.u) *100 / ( rp.x - lp.x));		  // calculate Text U step
 				int16_t textVstep = ((rp.v - lp.v) *100 / ( rp.x - lp.x));		  // calcualte Text V step	
-        
+        if (rp.x >= wid)  rp.x = wid;
+				
 				int16_t u = lp.u * 100;
 				int16_t v = lp.v * 100;
-
+        uint8_t width =  d2s[d].width;
 					for (int x = lp.x; x < rp.x; x++) {		
             u += textUstep;
             v += textVstep;						
-						colorLine[x] = 	imagep[  ( v / 100 * 80 +  u / 100)  ];					
+						colorLine[x] = 	imagep[  ( v / 100 * width +  u / 100)  ];					
 					}	
          // colorLine[lp.x] = 0xff00;		
          // colorLine[rp.x] = 0xff00;    	
