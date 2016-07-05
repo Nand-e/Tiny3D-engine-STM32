@@ -3,6 +3,14 @@
 
 #include <Arduino.h>
 
+#ifdef  FIXEDPOINT
+#define FIXED * 128
+#else
+#define FIXED * 128
+#endif
+
+
+
 struct Face {
   uint16_t v1;
   uint16_t v2; 
@@ -82,15 +90,15 @@ struct Vertex {
   }  
 };
 
+#define FIXEDPOINT
 
 
+template <class T>
 class Matrix  {
 public:  
-
-  template <class T>
-  friend Vertex<T> operator* (const Vertex<T> & vec, const Matrix& m);
+  friend Vertex<T> operator* (const Vertex<T> & vec, const Matrix<T> & m);
   /**************************************************************/
-  void createRotM ( int16_t x, int16_t y, int16_t z=0 ) {
+  void createRotM ( long x, long y, long z=0 ) {
      float x2 = x * M_PI / 180;
      float y2 = y * M_PI / 180;
      float z2 = z * M_PI / 180;  
@@ -99,25 +107,27 @@ public:
      float siny = sin ( y2 );     float cosy = cos ( y2 );
      float sinx = sin ( x2 );     float cosx = cos ( x2 );
 
-     m00 = cosy * cosz;  m10 = cosz * sinx*siny -cosx* sinz;     m20 = cosx*cosz*siny + sinx*sinz;
-     m01 = cosy * sinz;  m11 = cosx*cosz + sinx* siny * sinz;    m21 = cosx*siny*sinz - cosz * sinx;
-     m02 = -siny;        m12 =  cosy*sinx;                       m22 = cosx*cosy;
+     m00 = cosy*cosz*128;  m10 = ( cosz*sinx*siny-cosx*sinz )* 128;  m20 = ( cosx*cosz*siny + sinx*sinz )  * 128;
+     m01 = cosy*sinz*128;  m11 = ( cosx*cosz+sinx*siny*sinz )* 128;  m21 = ( cosx*siny*sinz - cosz * sinx )* 128;
+     m02 = -siny    *128;     m12 =  cosy*sinx * 128;                m22 = cosx*cosy *128;
   }
   
-  float m00, m10, m20;  
-  float m01, m11, m21;  
-  float m02, m12, m22;
+  T m00, m10, m20;  
+  T m01, m11, m21;  
+  T m02, m12, m22;
 };
 
-template < class T >  
-inline Vertex<T>  operator*( const Vertex<T> & ver, const Matrix & m) {
 
-    float x = m.m00 *ver.x + m.m10 * ver.y + m.m20 * ver.z;
-    float y = m.m01 *ver.x + m.m11 * ver.y + m.m21 * ver.z;
-    float z = m.m02 *ver.x + m.m12 * ver.y + m.m22 * ver.z;
+template < class T >  
+inline Vertex<T>  operator*( const Vertex<T> & ver, const Matrix<T> & m) {
+
+    T x = m.m00 *ver.x + m.m10 * ver.y + m.m20 * ver.z;
+    T y = m.m01 *ver.x + m.m11 * ver.y + m.m21 * ver.z;
+    T z = m.m02 *ver.x + m.m12 * ver.y + m.m22 * ver.z;
     Vertex<T> v(x,y,z);
     return v;
 }
+
 
 
 #endif

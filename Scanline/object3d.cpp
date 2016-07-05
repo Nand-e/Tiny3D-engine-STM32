@@ -20,7 +20,7 @@ Object3d<T>::Object3d ( const Vertex<T> * verts1, uint8_t vertN1, const Face * f
 
 //*********************************************************************************************************  
 template <class T>
-void Object3d<T>::rotate ( Matrix & rm, Vertex<T> * rotatedVerts, Vertex<T> scale ) {
+void Object3d<T>::rotate ( Matrix<T> & rm, Vertex<T> * rotatedVerts, Vertex<T> scale ) {
    float x,y, z;
    float xv, yv, zv;
    float * verts1 = ( float * ) verts;
@@ -35,9 +35,9 @@ void Object3d<T>::rotate ( Matrix & rm, Vertex<T> * rotatedVerts, Vertex<T> scal
      y = rm.m01 * xv + rm.m11 * yv + rm.m21 * zv;
      z = rm.m02 * xv + rm.m12 * yv + rm.m22 * zv;    
       
-     rotatedVerts[i].x = x;// + eltol.x;
-     rotatedVerts[i].y = y;// + eltol.y;
-     rotatedVerts[i].z = z;// + eltol.z;
+     rotatedVerts[i].x = x / 128;
+     rotatedVerts[i].y = y / 128;
+     rotatedVerts[i].z = z / 128;
   }
 } 
 

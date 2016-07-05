@@ -8,7 +8,7 @@ template <class T>
 class Object3d {
 public:
           Object3d   ( const Vertex<T> * verts1, uint8_t vertN1, const Face * faces1, uint8_t faceN1, Vertex<T> scl= { 30,30,30 } );
-  void    rotate     ( Matrix & rm, Vertex<T> * rotatedVerts, Vertex<T> scale = Vertex<T> ( 30,30,30 ) );         // Rotate and scale object veertices and put the result in rotated Verts
+  void    rotate     ( Matrix<T> & rm, Vertex<T> * rotatedVerts, Vertex<T> scale = Vertex<T> ( 30,30,30 ) );         // Rotate and scale object veertices and put the result in rotated Verts
   Vertex<T>  calcNormal ( const Vertex<T> &p1, const Vertex<T> &p2, const Vertex<T> &p3 );                        // calculate normal of given face
 
 public:

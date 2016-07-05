@@ -381,7 +381,7 @@ const Face faces1 [254] = PROGMEM {
 
 
 const uint8_t numberV2 = 16;
-const Vertex<float> verts2 [16] = PROGMEM {
+const Vertex<long> verts2 [16] = PROGMEM {
  {-50,-50,-50},
  { 50,-50,-50},
  { 50, 50,-50},

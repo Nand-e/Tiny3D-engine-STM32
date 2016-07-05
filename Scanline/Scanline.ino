@@ -1,4 +1,5 @@
 
+
 #include <Adafruit_GFX_AS.h>    // Core graphics library, with extra fonts.
 #include "Adafruit_ILI9341_STM.h" // STM32 DMA Hardware-specific library
 #include <SPI.h>
@@ -18,7 +19,7 @@
 #define MAXFACE 150
 D2Triangle d2s [MAXFACE];
 
-Vertex<float> rotatedVerts [140];
+Vertex<long>  rotatedVerts [140];
 Vertex<float>  light2( 0, 0, 1);
 
 uint16_t  colors [64];
@@ -33,16 +34,15 @@ Renderer renderer ( tft, WIDTH, HEIGHT );
 
 // 3Dobjets and container for them
 #define MAXOBJECTS 3
-Object3d<float>  obj(verts2, numberV2, faces2, numberF2 );
-//Object3d<float>  obj1(verts1, numberV1, faces1, numberF1 );
-Object3d<float>   * actual;
+Object3d<long>  obj ( verts2, numberV2, faces2, numberF2 );
+//Object3d<float>  obj1( verts1, numberV1, faces1, numberF1 );
+//Object3d<float>   * actual;
 
 
 
 /*******************************************************************/
 void setup() {
-  actual = &obj;
-
+  //actual = &obj;
   
   Serial.begin( 57600 );
   tft.begin();
@@ -87,7 +87,7 @@ void handleSerial () {
    /*   case '1':  actual = objs[0]; break;*/
    /*  case '2':  actual = objs[1]; break;*/
 
-      case 'i':  actual->angle.x+=3; break;
+  /*    case 'i':  actual->angle.x+=3; break;
       case 'm':  actual->angle.x-=3; break;
       
       case 'j':  actual->angle.y+=3; break;
@@ -98,7 +98,7 @@ void handleSerial () {
       case 's':  actual->position.y+=5; break;
       case 'w':  actual->position.y-=5; break;
       case 'r':  actual->position.z+=5; break;
-      case 'f':  actual->position.z-=5; break;     
+      case 'f':  actual->position.z-=5; break;     */
     
     }    
   }
@@ -106,15 +106,8 @@ void handleSerial () {
 
 /* translate vertexes 
  ***************************************************************************/  
-void translate ( Vertex<float> * verts, VertexInt & eltol, uint8_t number ) {
-   for ( uint8_t i=0; i < number; i++ ) {    
-      verts[i].x += eltol.x;
-      verts[i].y += eltol.y;
-      verts[i].z += eltol.z;
-   }
-}
-
-void translate ( Vertex<int16_t> * verts, VertexInt & eltol, uint8_t number ) {
+template < class T >
+void translate ( Vertex<T> * verts, Vertex<T> & eltol, uint8_t number ) {
    for ( uint8_t i=0; i < number; i++ ) {    
       verts[i].x += eltol.x;
       verts[i].y += eltol.y;
@@ -125,7 +118,8 @@ void translate ( Vertex<int16_t> * verts, VertexInt & eltol, uint8_t number ) {
 /* Create 2D faces
  * project vertex, back face culling, lighting 
  **********************************************************/
-void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color, uint8_t & facecounter) {
+template < class T >
+void create2DFaces( Object3d<T> & obj, Vertex<T> * verts, uint16_t color, uint8_t & facecounter) {
 
   #define CENTERX 150
   #define CENTERY 100
@@ -152,10 +146,10 @@ void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color
     // back face culling 
     int16_t n = (x1-x)*(y1 + y) + (x2-x1) *(y2+y1) + (x - x2)*(y + y2);
     if ( n > 0 ) { 
-       normal = obj.calcNormal(verts[i1], verts[i2], verts[i3] );           // MISTAKE I calculate the normals from projected verts. I have to repair this TODO
+       // no need for textureing only for lighting normal = obj.calcNormal(verts[i1], verts[i2], verts[i3] );           // MISTAKE I calculate the normals from projected verts. I have to repair this TODO
        // calculate light
-       fl = normal.dot( light2 );
-       if ( fl < 0  ) fl =0;    
+       //fl = normal.dot( light2 );
+       //if ( fl < 0  ) fl =0;    
        uint8_t cw  =  10+ 53 * fl;
        cw %= 64;  
        if ( facecounter < MAXFACE) {
@@ -165,9 +159,7 @@ void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color
           d2s[facecounter].calculate();
           d2s[facecounter].color = colors[cw] | color; 
           d2s[facecounter].textId = (i/2)%5;      // TODO move to faces
-          d2s[facecounter].width  = 80;
-          // else                      d2s[facecounter].width  = 20;
-     
+          d2s[facecounter].width  = 80;            
           facecounter++;
        }     
     }
@@ -189,8 +181,9 @@ void create2DFaces( Object3d<float> & obj, Vertex<float> * verts, uint16_t color
 }
 /************************************************************************/
 Vertex<float>  o2, o3;            
-Matrix matrix;
-Matrix matrix2;    
+
+Matrix<long> matrix;
+Matrix<long> matrix2;    
    
 long lastDraw; 
 int16_t angle = 0;
@@ -204,31 +197,30 @@ void loop() {
    handleSerial();
 
    angle += 2;
-   angle %= 720;
- 
+   angle %= 720; 
 
    // rotate objects and create faces
-   uint8_t d2counter = 0;             // number of face to draw ( after back face culling )
+   uint8_t d2counter = 0;                                                     // number of face to draw ( after back face culling )
 
-   int i =0;
- 
+   int i =0; 
    matrix.createRotM ( angle ,angle*2 , angle *2 );
-   obj.rotate ( matrix, rotatedVerts, Vertex<float> ( 2,2,2 ) );              // rotate obj vers and put the result in rotetdVerts array 
+   obj.rotate ( matrix, rotatedVerts, Vertex<long> ( 1,1,1 ) );             // rotate obj vers and put the result in rotetdVerts array 
 
-   VertexInt pos;
+   Vertex<long> pos;
    pos.x = -150;
-   pos.y = 100;
-   pos.z = 650;   
+   pos.y =  100;
+   pos.z =  650;   
    translate ( rotatedVerts, pos , obj.vertN );
-   create2DFaces  ( obj, rotatedVerts,  0xf000, d2counter );                     // create faces and give the created number of faces back in d2counter
+   create2DFaces<long> ( obj, rotatedVerts,  0xf000, d2counter );           // create faces and give the created number of faces back in d2counter
 
+   /* 
    matrix.createRotM ( -30 , -angle , angle *3 );
-   obj.rotate ( matrix, rotatedVerts, Vertex<float> ( 2,2,2 ) );   
+   obj.rotate ( matrix, rotatedVerts, Vertex<int16_t> ( 2,2,2 ) );   
    pos.x = 150;
    pos.y = -100;
    pos.z = 600;   
    translate ( rotatedVerts, pos , obj.vertN );
-   create2DFaces  ( obj, rotatedVerts,  0xf000, d2counter );  
+   create2DFaces<int16_t>  ( obj, rotatedVerts,  0xf000, d2counter );  */
   
    drawGraph ( d2counter, 0);
    
